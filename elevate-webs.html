@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Elevate Webs — Websites That Move</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#05030d;
+    --deep:#0a0e27;
+    --blue:#00d4ff;
+    --blue-dim:#0891b2;
+    --purple:#8b5cf6;
+    --purple-light:#c084fc;
+    --white:#f4f6ff;
+    --mute:#8891b5;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:auto;}
+  body{
+    background:var(--void);
+    color:var(--white);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    cursor:default;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  #webgl-canvas{
+    position:fixed;
+    top:0;left:0;
+    width:100vw;height:100vh;
+    z-index:1;
+    display:block;
+  }
+
+  #grain{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    z-index:3;pointer-events:none;
+    opacity:0.035;
+    mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .vignette{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    z-index:2;pointer-events:none;
+    background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+  }
+
+  /* ---------- NAV / LOGO ---------- */
+  .logo-float{
+    position:fixed;
+    top:36px;left:50%;
+    transform:translateX(-50%);
+    z-index:20;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:19px;
+    letter-spacing:0.5px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 22px;
+    border-radius:100px;
+    background:rgba(10,14,39,0.35);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(139,92,246,0.25);
+    transition:transform 0.6s ease, opacity 0.6s ease;
+  }
+  .logo-float .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--blue);
+    box-shadow:0 0 12px 3px var(--blue);
+    animation:pulse-dot 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse-dot{
+    0%,100%{opacity:1; transform:scale(1);}
+    50%{opacity:0.5; transform:scale(0.7);}
+  }
+  .logo-float span.grad{
+    background:linear-gradient(90deg,var(--blue),var(--purple-light));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  /* ---------- SCROLL SECTIONS (content overlay) ---------- */
+  .scene{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:10;
+    padding:120px 24px;
+  }
+
+  .content-panel{
+    max-width:880px;
+    text-align:center;
+    opacity:0;
+    transform:translateY(40px);
+    transition:opacity 1s cubic-bezier(.16,.8,.3,1), transform 1s cubic-bezier(.16,.8,.3,1);
+  }
+  .content-panel.in-view{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .eyebrow{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    letter-spacing:4px;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:22px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before, .eyebrow::after{
+    content:'';
+    width:28px;height:1px;
+    background:linear-gradient(90deg, transparent, var(--blue));
+  }
+  .eyebrow::after{background:linear-gradient(90deg, var(--blue), transparent);}
+
+  h1.hero-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(2.4rem, 6vw, 4.6rem);
+    line-height:1.08;
+    letter-spacing:-1.5px;
+    margin-bottom:28px;
+  }
+  h1.hero-title .grad{
+    background:linear-gradient(120deg,var(--blue) 10%, var(--purple-light) 55%, var(--purple) 90%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  p.lead{
+    font-size:clamp(1rem,1.6vw,1.2rem);
+    color:var(--mute);
+    line-height:1.7;
+    max-width:640px;
+    margin:0 auto 44px;
+    font-weight:300;
+  }
+
+  .btn-row{
+    display:flex;
+    gap:18px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  .btn{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:0.3px;
+    padding:16px 34px;
+    border-radius:100px;
+    cursor:pointer;
+    border:none;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:transform 0.35s cubic-bezier(.16,.8,.3,1), box-shadow 0.35s ease;
+    position:relative;
+  }
+  .btn-primary{
+    background:linear-gradient(120deg,var(--blue),var(--purple));
+    color:#03040c;
+    box-shadow:0 0 0px rgba(0,212,255,0.5);
+  }
+  .btn-primary:hover{
+    transform:translateY(-3px) scale(1.03);
+    box-shadow:0 8px 34px rgba(0,212,255,0.35), 0 8px 34px rgba(139,92,246,0.25);
+  }
+  .btn-ghost{
+    background:rgba(255,255,255,0.03);
+    color:var(--white);
+    border:1px solid rgba(139,92,246,0.4);
+    backdrop-filter:blur(6px);
+  }
+  .btn-ghost:hover{
+    transform:translateY(-3px);
+    border-color:var(--blue);
+    box-shadow:0 8px 30px rgba(0,212,255,0.18);
+  }
+
+  .scroll-cue{
+    position:absolute;
+    bottom:44px;left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    color:var(--mute);
+    font-size:11px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    opacity:0.7;
+    animation:fadecue 3s ease-in-out infinite;
+  }
+  @keyframes fadecue{
+    0%,100%{opacity:0.3; transform:translate(-50%,0);}
+    50%{opacity:0.9; transform:translate(-50%,8px);}
+  }
+  .scroll-cue .line{
+    width:1px;height:36px;
+    background:linear-gradient(180deg,var(--blue),transparent);
+  }
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .about-name{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    color:var(--purple-light);
+  }
+  .stat-row{
+    display:flex;
+    gap:48px;
+    justify-content:center;
+    margin-top:46px;
+    flex-wrap:wrap;
+  }
+  .stat{
+    text-align:center;
+  }
+  .stat .num{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:2.2rem;
+    font-weight:700;
+    background:linear-gradient(120deg,var(--blue),var(--purple-light));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .stat .label{
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--mute);
+    margin-top:4px;
+  }
+
+  /* ---------- PORTFOLIO ---------- */
+  .portfolio-wrap{
+    max-width:1200px;
+    width:100%;
+  }
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:28px;
+    margin-top:56px;
+  }
+  .holo-card{
+    position:relative;
+    border-radius:20px;
+    padding:2px;
+    background:linear-gradient(140deg, rgba(0,212,255,0.5), rgba(139,92,246,0.5));
+    cursor:pointer;
+    transform-style:preserve-3d;
+    perspective:800px;
+    opacity:0;
+    transform:translateY(50px) rotateX(10deg);
+    transition:opacity 0.9s ease, transform 0.9s cubic-bezier(.16,.8,.3,1);
+  }
+  .holo-card.in-view{opacity:1; transform:translateY(0) rotateX(0deg);}
+  .holo-card:nth-child(1){transition-delay:0.05s;}
+  .holo-card:nth-child(2){transition-delay:0.18s;}
+  .holo-card:nth-child(3){transition-delay:0.31s;}
+  .holo-card:nth-child(4){transition-delay:0.44s;}
+
+  .holo-inner{
+    background:linear-gradient(160deg, rgba(10,14,39,0.92), rgba(5,3,13,0.96));
+    border-radius:18px;
+    padding:30px 24px 26px;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:14px;
+    transition:transform 0.5s cubic-bezier(.16,.8,.3,1), box-shadow 0.5s ease;
+  }
+  .holo-card:hover .holo-inner{
+    transform:translateY(-10px) rotateX(4deg);
+    box-shadow:0 20px 50px rgba(0,212,255,0.18), 0 20px 50px rgba(139,92,246,0.15);
+  }
+  .holo-icon{
+    width:100%;
+    height:130px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.08);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .holo-icon-shade{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(3,2,8,0.15), rgba(3,2,8,0.7));
+    pointer-events:none;
+  }
+  .holo-icon-svg{
+    position:relative; z-index:2;
+    width:34px; height:34px;
+    filter:drop-shadow(0 0 10px currentColor);
+  }
+  .holo-icon-svg svg{width:100%;height:100%; stroke-width:1.4;}
+  .holo-icon::after{
+    content:'';
+    position:absolute;
+    top:0;left:-100%;
+    width:60%;height:100%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation:scan 3.2s ease-in-out infinite;
+    z-index:3;
+  }
+  @keyframes scan{
+    0%{left:-60%;}
+    50%{left:120%;}
+    100%{left:120%;}
+  }
+  .holo-card:nth-child(2) .holo-icon::after{animation-delay:0.6s;}
+  .holo-card:nth-child(3) .holo-icon::after{animation-delay:1.2s;}
+  .holo-card:nth-child(4) .holo-icon::after{animation-delay:1.8s;}
+
+  .holo-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:1.15rem;
+  }
+  .holo-tag{
+    font-size:12px;
+    color:var(--blue);
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+  .holo-desc{
+    font-size:13.5px;
+    color:var(--mute);
+    line-height:1.6;
+  }
+  .holo-open{
+    margin-top:auto;
+    font-size:13px;
+    font-weight:600;
+    color:var(--purple-light);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .holo-open svg{transition:transform 0.3s ease;}
+  .holo-card:hover .holo-open svg{transform:translateX(4px);}
+
+  /* Preview modal — full mini landing page */
+  .preview-overlay{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:rgba(2,1,8,0.88);
+    backdrop-filter:blur(10px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.4s ease;
+    padding:20px;
+  }
+  .preview-overlay.active{opacity:1; pointer-events:all;}
+  .preview-modal{
+    width:min(920px, 100%);
+    height:min(720px, 92vh);
+    overflow-y:auto;
+    overflow-x:hidden;
+    border-radius:20px;
+    background:#07050f;
+    border:1px solid rgba(139,92,246,0.35);
+    position:relative;
+    transform:scale(0.94) translateY(20px);
+    transition:transform 0.45s cubic-bezier(.16,.8,.3,1);
+    box-shadow:0 30px 90px rgba(0,0,0,0.7);
+    scrollbar-width:thin;
+    scrollbar-color:rgba(139,92,246,0.5) transparent;
+  }
+  .preview-modal::-webkit-scrollbar{width:8px;}
+  .preview-modal::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.4); border-radius:10px;}
+  .preview-overlay.active .preview-modal{transform:scale(1) translateY(0);}
+  .preview-close{
+    position:fixed;
+    top:16px;right:16px;
+    width:38px;height:38px;
+    border-radius:50%;
+    background:rgba(10,14,39,0.85);
+    border:1px solid rgba(255,255,255,0.15);
+    color:var(--white);
+    font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    z-index:200;
+    transition:background 0.3s ease, transform 0.3s ease;
+  }
+  .preview-close:hover{background:rgba(255,255,255,0.14); transform:scale(1.08);}
+
+  /* ============================================================
+     BROWSER CHROME — frames the whole preview as a live browser tab,
+     matching the reference screenshots' traffic-light + URL bar look.
+     ============================================================ */
+  .browser-chrome{
+    position:sticky;
+    top:0;
+    z-index:30;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:12px 16px;
+    background:#0c0a14;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .browser-dots{ display:flex; gap:7px; flex-shrink:0; }
+  .browser-dots span{
+    width:11px;height:11px;border-radius:50%;
+    display:block;
+  }
+  .browser-dots span:nth-child(1){background:#ff5f57;}
+  .browser-dots span:nth-child(2){background:#febc2e;}
+  .browser-dots span:nth-child(3){background:#28c840;}
+  .browser-url{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:7px;
+    padding:6px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:11.5px;
+    color:var(--mute);
+  }
+  .browser-url svg{width:11px;height:11px; flex-shrink:0; opacity:0.7;}
+  .browser-tag{
+    flex-shrink:0;
+    font-family:'Inter',sans-serif;
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--blue);
+    display:flex;align-items:center;gap:6px;
+  }
+  .browser-tag::before{
+    content:'';width:6px;height:6px;border-radius:50%;
+    background:var(--blue); box-shadow:0 0 8px 2px var(--blue);
+    animation:pulse-dot 2s ease-in-out infinite;
+  }
+
+  /* ============================================================
+     DEMO SITE — shared skeleton, per-industry look driven by
+     CSS variables (--dfont-display / --dfont-body / --dc1 / --dc2 etc)
+     set inline per project so each business has its own identity.
+     ============================================================ */
+  .demo-site{
+    --dtext:#f4f6ff;
+    --dmute:rgba(244,246,255,0.62);
+    font-family:var(--dfont-body, 'Inter', sans-serif);
+    color:var(--dtext);
+    background:var(--dbg, #07050f);
+  }
+
+  /* --- nav --- */
+  .demo-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 34px;
+    border-bottom:1px solid rgba(255,255,255,0.07);
+    position:relative;
+    z-index:5;
+  }
+  .demo-nav .dn-brand{
+    font-family:var(--dfont-display);
+    font-weight:var(--dbrand-weight, 700);
+    font-size:var(--dbrand-size, 1.05rem);
+    letter-spacing:var(--dbrand-tracking, 0.3px);
+    display:flex; align-items:center; gap:9px;
+  }
+  .demo-nav .dn-brand .dn-mark{
+    width:7px;height:7px;
+    background:var(--dc1);
+    box-shadow:0 0 10px 2px var(--dc1);
+    border-radius:var(--dmark-radius, 2px);
+    flex-shrink:0;
+  }
+  .demo-nav .dn-links{
+    display:flex;
+    gap:28px;
+    font-size:12px;
+    letter-spacing:0.3px;
+    color:var(--dmute);
+  }
+  .demo-nav .dn-cta{
+    font-family:var(--dfont-display);
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.4px;
+    padding:9px 18px;
+    border-radius:var(--dbtn-radius, 100px);
+    color:#050308;
+    background:linear-gradient(120deg,var(--dc1),var(--dc2));
+    text-decoration:none;
+    white-space:nowrap;
+  }
+
+  /* --- hero: illustrated scene backdrop, content overlaid bottom-left --- */
+  .demo-hero{
+    position:relative;
+    min-height:300px;
+    padding:0;
+    overflow:hidden;
+    isolation:isolate;
+    display:flex;
+    align-items:flex-end;
+  }
+  .demo-hero .scene-bg{
+    position:absolute; inset:0; z-index:-2;
+  }
+  .demo-hero .scene-shade{
+    position:absolute; inset:0; z-index:-1;
+    background:
+      linear-gradient(90deg, rgba(3,2,8,0.96) 0%, rgba(3,2,8,0.72) 38%, rgba(3,2,8,0.15) 75%),
+      linear-gradient(0deg, rgba(3,2,8,0.9) 0%, transparent 55%);
+  }
+  .demo-hero .dh-inner{
+    position:relative;
+    padding:34px 36px 32px;
+    max-width:480px;
+  }
+  .demo-hero .dh-eyebrow{
+    font-family:var(--dfont-body);
+    font-size:10.5px;
+    font-weight:600;
+    letter-spacing:2.6px;
+    text-transform:uppercase;
+    color:var(--dc1);
+    margin-bottom:14px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .demo-hero .dh-eyebrow::before{
+    content:'';
+    width:14px;height:1px;
+    background:var(--dc1);
+  }
+  .demo-hero h2{
+    font-family:var(--dfont-display);
+    font-weight:var(--dhero-weight, 700);
+    font-style:var(--dhero-style, normal);
+    font-size:var(--dhero-size, clamp(1.7rem, 3.6vw, 2.4rem));
+    line-height:var(--dhero-lh, 1.1);
+    letter-spacing:var(--dhero-tracking, -0.5px);
+    margin-bottom:22px;
+    text-shadow:0 2px 20px rgba(0,0,0,0.4);
+  }
+  .demo-hero .dh-btns{
+    display:flex;gap:12px;flex-wrap:wrap;
+  }
+  .dh-btn-primary{
+    font-family:var(--dfont-display);
+    font-size:12.5px;font-weight:600;
+    letter-spacing:0.3px;
+    padding:12px 22px;border-radius:var(--dbtn-radius, 100px);
+    color:#050308;
+    background:linear-gradient(120deg,var(--dc1),var(--dc2));
+    text-decoration:none;
+    box-shadow:0 8px 26px -6px var(--dc1);
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .dh-btn-ghost{
+    font-family:var(--dfont-display);
+    font-size:12.5px;font-weight:600;
+    letter-spacing:0.3px;
+    padding:12px 22px;border-radius:var(--dbtn-radius, 100px);
+    background:rgba(255,255,255,0.07);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,0.18);
+    color:#fff;
+    text-decoration:none;
+  }
+
+  /* --- trust strip: small credential row beneath hero, icon + line --- */
+  .demo-trust{
+    display:flex;
+    justify-content:center;
+    gap:36px;
+    flex-wrap:wrap;
+    padding:22px 34px;
+    background:var(--dpanel, #0b0916);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .demo-trust .dt-item{
+    display:flex; align-items:center; gap:10px;
+    font-size:12px; color:var(--dmute);
+  }
+  .demo-trust .dt-item svg{width:17px;height:17px; color:var(--dc1); flex-shrink:0; stroke-width:1.6;}
+  .demo-trust .dt-item b{ color:var(--dtext); font-weight:600; }
+
+  /* --- gallery section: illustrated scene tiles with price/label badge --- */
+  .demo-section{
+    padding:48px 34px 44px;
+  }
+  .demo-section .ds-label{
+    font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;
+    color:var(--dc1); margin-bottom:10px; font-weight:600;
+  }
+  .demo-section h3{
+    font-family:var(--dfont-display);
+    font-weight:var(--dh3-weight, 600);
+    font-style:var(--dhero-style, normal);
+    font-size:1.5rem; margin-bottom:28px;
+    letter-spacing:var(--dh3-tracking, -0.3px);
+  }
+  .demo-tiles{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:16px;
+  }
+  .demo-tile{
+    position:relative;
+    border-radius:12px;
+    height:190px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,0.09);
+    isolation:isolate;
+    transition:transform 0.4s cubic-bezier(.16,.8,.3,1), box-shadow 0.4s ease;
+  }
+  .demo-tile:hover{ transform:translateY(-5px); box-shadow:0 18px 34px -10px rgba(0,0,0,0.5); }
+  .demo-tile .scene-bg{
+    position:absolute; inset:0; z-index:0;
+  }
+  .demo-tile .tile-shade{
+    position:absolute; inset:0; z-index:1;
+    background:linear-gradient(180deg, transparent 35%, rgba(2,2,6,0.92) 100%);
+  }
+  .demo-tile .tile-content{
+    position:absolute; left:0; right:0; bottom:0; z-index:2;
+    padding:14px 15px;
+    display:flex; align-items:flex-end; justify-content:space-between; gap:8px;
+  }
+  .demo-tile .tile-text{ display:flex; flex-direction:column; gap:3px; }
+  .demo-tile .tile-title{
+    font-family:var(--dfont-display);
+    font-size:13px; font-weight:600; color:#fff;
+    letter-spacing:0.1px;
+  }
+  .demo-tile .tile-sub{
+    font-size:10.5px; color:rgba(255,255,255,0.62); letter-spacing:0.2px;
+  }
+  .demo-tile .tile-badge{
+    flex-shrink:0;
+    font-family:var(--dfont-display);
+    font-size:12px; font-weight:700;
+    padding:5px 11px;
+    border-radius:100px;
+    color:#050308;
+    background:linear-gradient(120deg,var(--dc1),var(--dc2));
+    white-space:nowrap;
+  }
+
+  /* --- footer CTA: full scene banner --- */
+  .demo-footer-cta{
+    position:relative;
+    text-align:center;
+    padding:54px 34px 58px;
+    margin:8px 0 0;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .demo-footer-cta .scene-bg{
+    position:absolute; inset:0; z-index:-2; opacity:0.5;
+  }
+  .demo-footer-cta::before{
+    content:'';
+    position:absolute; inset:0; z-index:-1;
+    background:linear-gradient(180deg, rgba(5,3,10,0.55), rgba(5,3,10,0.95));
+  }
+  .demo-footer-cta h4{
+    font-family:var(--dfont-display);
+    font-weight:var(--dhero-weight, 700);
+    font-style:var(--dhero-style, normal);
+    font-size:1.4rem; margin-bottom:22px;
+    letter-spacing:var(--dhero-tracking, -0.3px);
+  }
+  .demo-footer-cta .dh-btns{ justify-content:center; }
+
+
+  /* ---------- CONTACT ---------- */
+  .contact-channels{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-top:8px;
+  }
+  .channel-pill{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 18px;
+    border-radius:100px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(139,92,246,0.3);
+    text-decoration:none;
+    color:var(--white);
+    transition:transform 0.3s cubic-bezier(.16,.8,.3,1), border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .channel-pill:hover{
+    transform:translateY(-3px);
+    border-color:var(--blue);
+    box-shadow:0 8px 26px rgba(0,212,255,0.15);
+  }
+  .channel-pill .ch-flag{font-size:17px;}
+  .channel-pill .ch-text{display:flex; flex-direction:column; align-items:flex-start; line-height:1.3;}
+  .channel-pill .ch-label{font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--mute);}
+  .channel-pill .ch-value{font-size:13px; font-weight:600; font-family:'Space Grotesk',sans-serif;}
+
+  .contact-form{
+    width:100%;
+    max-width:520px;
+    margin:32px auto 0;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    text-align:left;
+  }
+  .form-field{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .form-field label{
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--mute);
+  }
+  .form-field input, .form-field textarea{
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(139,92,246,0.25);
+    border-radius:12px;
+    padding:14px 16px;
+    color:var(--white);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    outline:none;
+    transition:border-color 0.3s ease, box-shadow 0.3s ease;
+    resize:none;
+  }
+  .form-field input:focus, .form-field textarea:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(0,212,255,0.12);
+  }
+  .form-field textarea{min-height:100px;}
+
+  .form-msg{
+    font-size:13px;
+    color:var(--blue);
+    min-height:18px;
+    text-align:center;
+  }
+
+  footer{
+    position:relative;
+    z-index:10;
+    text-align:center;
+    padding:60px 24px 80px;
+    color:var(--mute);
+    font-size:13px;
+  }
+  footer .foot-logo{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1.4rem;
+    font-weight:700;
+    margin-bottom:12px;
+    background:linear-gradient(90deg,var(--blue),var(--purple-light));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  @media (max-width:640px){
+    .stat-row{gap:28px;}
+    .logo-float{font-size:15px; padding:8px 16px;}
+    .scene{padding:100px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="webgl-canvas"></canvas>
+<div class="vignette"></div>
+<div id="grain"></div>
+
+<div class="logo-float">
+  <span class="dot"></span>
+  <span>Elevate <span class="grad">Webs</span></span>
+</div>
+
+<!-- SECTION 1 : HERO / TUNNEL ENTRY -->
+<section class="scene" id="scene-1" data-scene="0">
+  <div class="content-panel">
+    <div class="eyebrow">Websites Built To Convert</div>
+    <h1 class="hero-title">Turn Visitors Into<br><span class="grad">Customers</span> With A Website<br>That Stands Out.</h1>
+    <p class="lead">Premium, fast, mobile-first websites engineered to grab attention in the first three seconds — and keep it.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="document.getElementById('scene-3').scrollIntoView({behavior:'smooth'})">View Projects</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('scene-4').scrollIntoView({behavior:'smooth'})">Build Now</button>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>Scroll To Enter</span><span class="line"></span></div>
+</section>
+
+<!-- SECTION 2 : ABOUT / FLOATING CITY -->
+<section class="scene" id="scene-2" data-scene="1">
+  <div class="content-panel">
+    <div class="eyebrow">About Me</div>
+    <h1 class="hero-title">The Developer<br>Behind The <span class="grad">Vision</span></h1>
+    <div class="about-grid">
+      <p class="lead">I'm <span class="about-name">Junaid Muhammad</span>, a 15-year-old website developer helping businesses across Pakistan and Canada build modern websites that drive growth.</p>
+      <p class="lead">Every website I create is designed to be visually stunning, mobile responsive, fast, and focused on helping businesses attract more customers.</p>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="num">15</div><div class="label">Years Old</div></div>
+      <div class="stat"><div class="num">2</div><div class="label">Countries Served</div></div>
+      <div class="stat"><div class="num">100%</div><div class="label">Mobile Ready</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3 : PORTFOLIO WORLD -->
+<section class="scene" id="scene-3" data-scene="2">
+  <div class="portfolio-wrap">
+    <div class="content-panel" style="max-width:700px; margin:0 auto;">
+      <div class="eyebrow">Portfolio Template World</div>
+      <h1 class="hero-title">Step Into The <span class="grad">Holograms</span></h1>
+      <p class="lead">Four live concepts, rendered as holographic previews. Click any card to open the experience.</p>
+    </div>
+    <div class="card-grid" id="card-grid">
+      <!-- cards injected via JS for stagger control -->
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4 : CONTACT UNIVERSE -->
+<section class="scene" id="scene-4" data-scene="3">
+  <div class="content-panel">
+    <div class="eyebrow">Contact Universe</div>
+    <h1 class="hero-title">Let's Build Something<br><span class="grad">Incredible</span></h1>
+    <p class="lead">Tell me about your business and where you want it to go. I'll reply with a plan, not a sales pitch.</p>
+
+    <div class="contact-channels">
+      <a class="channel-pill" href="tel:+16474003272">
+        <span class="ch-flag">🇨🇦</span>
+        <span class="ch-text"><span class="ch-label">Canada</span><span class="ch-value">+1 647 400 3272</span></span>
+      </a>
+      <a class="channel-pill" href="tel:+923201001234">
+        <span class="ch-flag">🇵🇰</span>
+        <span class="ch-text"><span class="ch-label">Pakistan</span><span class="ch-value">+92 320 1001234</span></span>
+      </a>
+      <a class="channel-pill" href="https://instagram.com/elevate.webs" target="_blank" rel="noopener">
+        <span class="ch-flag">📸</span>
+        <span class="ch-text"><span class="ch-label">Instagram</span><span class="ch-value">@elevate.webs</span></span>
+      </a>
+    </div>
+
+    <form class="contact-form" id="contact-form" action="https://formspree.io/f/xdarpned" method="POST">
+      <div class="form-field">
+        <label for="f-name">Name</label>
+        <input type="text" id="f-name" name="name" placeholder="Your full name" required>
+      </div>
+      <div class="form-field">
+        <label for="f-email">Email</label>
+        <input type="email" id="f-email" name="email" placeholder="you@business.com" required>
+      </div>
+      <div class="form-field">
+        <label for="f-msg">Project Details</label>
+        <textarea id="f-msg" name="message" placeholder="Tell me a bit about your business and what you need..."></textarea>
+      </div>
+      <input type="hidden" name="_subject" value="New lead from Elevate Webs website">
+    
+      <div class="btn-row" style="margin-top:6px;">
+        <button type="button" class="btn btn-ghost" id="book-call-btn">Message Me</button>
+        <button type="submit" class="btn btn-primary">Build My Website</button>
+      </div>
+      <div class="form-msg" id="form-msg"></div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-logo">Elevate Webs</div>
+  <div>Designed &amp; built by Junaid Muhammad · © 2026</div>
+</footer>
+
+<!-- PREVIEW MODAL (mini landing page rendered per business via JS) -->
+<div class="preview-overlay" id="preview-overlay">
+  <div class="preview-close" id="preview-close">✕</div>
+  <div class="preview-modal">
+    <div id="preview-modal-body"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ============================================================
+   ELEVATE WEBS — 3D SCROLL TUNNEL
+   ============================================================ */
+
+let modalOpen = false; // true while the preview modal is open — pauses the WebGL tunnel loop for smoother modal performance
+
+// ---------- SVG ICON LIBRARY (line-icon style, no emoji) ----------
+const ICONS = {
+  court: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M12 4v16M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
+  trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4"/><path d="M12 13v4M9 21h6M10 17h4v4h-4Z"/></svg>',
+  scissors: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5M9.5 12 12 12"/></svg>',
+  droplet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
+  flame: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2s5 4.5 5 9.5a5 5 0 0 1-10 0c0-1.3.5-2.3 1-3 .3 1 1 1.7 1.5 1.7C9 8 8.5 5.5 10.5 3c0 1.5.7 2 1 2.3.6-1 .5-2.3.5-3.3Z"/></svg>',
+  wine: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 3h8l-1 7a3 3 0 0 1-6 0L8 3Z"/><path d="M12 13v6M9 21h6"/></svg>',
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  monitor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>',
+  medal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="14" r="6"/><path d="M9 4h6l-2 6h-2L9 4Z"/><path d="M10.5 12.5 12 14l3-3"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15 20c0-2.5 1.3-4.5 3-5.4"/></svg>',
+  target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor"/></svg>',
+  swords: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 19 19 5M5 5l6 6M15 13l4 4-2 2-4-4M9 15l-4 4"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 21V4"/><path d="M5 5h13l-3 4 3 4H5"/></svg>',
+  gamepad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="8" width="20" height="10" rx="5"/><path d="M7 11v4M5 13h4"/><circle cx="16" cy="12" r="1" fill="currentColor"/><circle cx="18.5" cy="14.5" r="1" fill="currentColor"/></svg>',
+  steak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 15c-2-3 0-8 4-9 3-1 6 1 6 4 3 0 5 2 5 5s-2 5-5 5c-2 3-6 4-8 1-2-2-2-4-2-6Z"/></svg>',
+  lobster: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><ellipse cx="12" cy="12" rx="4" ry="7"/><path d="M12 5V3M9 6l-2-2M15 6l2-2M9 18l-2 2M15 18l2 2"/></svg>',
+  mushroom: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 11a8 8 0 0 1 16 0c0 1.5-1.5 1.5-8 1.5S4 12.5 4 11Z"/><path d="M12 12.5V21M9 21h6"/></svg>',
+  cake: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 21v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7"/><path d="M4 21h16M8 12V8M12 12V8M16 12V8M12 4v2"/></svg>',
+  ball: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16M6 6l12 12M18 6 6 18"/></svg>',
+  glove: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 21c-2-1-3-3-3-6V9a2 2 0 0 1 4 0v3M7 12V6a2 2 0 0 1 4 0v5M11 11V5a2 2 0 0 1 4 0v6M15 12V7a2 2 0 0 1 4 0v6c0 4-2 8-6 8H9"/></svg>',
+  comb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 4h14v4H5zM6 8v12M9 8v12M12 8v12M15 8v12M18 8v12"/></svg>',
+  gem: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3h12l4 6-10 12L2 9Z"/><path d="M2 9h20M9 3l-1 6 4 12 4-12-1-6"/></svg>',
+  hand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 12V5a1.5 1.5 0 0 1 3 0v6M11 11V4a1.5 1.5 0 0 1 3 0v7M14 12V6a1.5 1.5 0 0 1 3 0v7M17 13V9a1.5 1.5 0 0 1 3 0v6c0 4-3 7-7 7h-2c-3 0-4-1-6-4l-2-3.5c-.6-1 .2-2.2 1.3-2 .6.1 1 .5 1.4 1L8 15"/></svg>'
+};
+function icon(key){ return ICONS[key] || ICONS.gem; }
+
+/* ============================================================
+   SCENE PHOTOGRAPHY — real photos (Unsplash, free license) used behind
+   hero panels and gallery tiles, layered with a brand-colored gradient
+   tint so each preview still reads as belonging to its own brand palette
+   rather than a generic stock photo. Returned as a CSS-ready
+   multi-layer background-image string (gradient + photo).
+   ============================================================ */
+
+// Real photography, one per environment type. Multiple tile variants of the
+// same business can share a photo — the gradient tint + crop position vary
+// per variant so repeats don't look identical.
+const SCENE_PHOTOS = {
+  court:      'https://images.unsplash.com/photo-1572454181157-0b40dd7667fe?auto=format&fit=crop&w=1200&q=80',
+  training:   'https://images.unsplash.com/photo-1545507268-27d6d8354f41?auto=format&fit=crop&w=1200&q=80',
+  salon:      'https://images.unsplash.com/photo-1580618662966-832a2dcea59f?auto=format&fit=crop&w=1200&q=80',
+  beautyTool: 'https://images.unsplash.com/photo-1580618662966-832a2dcea59f?auto=format&fit=crop&w=1200&q=80',
+  plate:      'https://images.unsplash.com/photo-1728376336175-17dee7f07da2?auto=format&fit=crop&w=1200&q=80',
+  wineGlass:  'https://images.unsplash.com/photo-1586124288020-1d7436afd010?auto=format&fit=crop&w=1200&q=80',
+  rig:        'https://images.unsplash.com/photo-1761131745229-763bffe31248?auto=format&fit=crop&w=1200&q=80',
+  lounge:     'https://images.unsplash.com/photo-1700085626695-6532f02cc961?auto=format&fit=crop&w=1200&q=80'
+};
+
+// Crop focal point varies by variant so repeated photos (e.g. multiple
+// restaurant tiles reusing the plate shot) don't look like duplicates.
+const VARIANT_POSITION = {
+  a: 'center',
+  b: '30% 40%',
+  c: '70% 30%'
+};
+
+function sceneBg(key, c1, c2, variant){
+  const photo = SCENE_PHOTOS[key];
+  if(!photo) return 'none';
+  // HTML-escape & to &amp; since this string is embedded directly into an
+  // HTML attribute value (innerHTML), not set via the DOM style API.
+  const safePhoto = photo.replace(/&/g, '&amp;');
+  // Brand-colored gradient wash on top of the real photo — keeps each
+  // business's palette identity while the photo supplies real depth/texture.
+  return `linear-gradient(160deg, ${c1}55 0%, transparent 45%, rgba(3,2,8,0.75) 100%), linear-gradient(0deg, rgba(3,2,8,0.55), rgba(3,2,8,0.15)), url('${safePhoto}')`;
+}
+function scenePosition(variant){
+  return VARIANT_POSITION[variant] || 'center';
+}
+
+// ---------- PORTFOLIO DATA ----------
+// Each entry renders as a full mini landing page inside the preview modal.
+// Design tokens (fonts, weights, radii) give every business its own identity —
+// a salon should not look like a gaming lounge.
+const projects = [
+  {
+    key:'sports', title:'Sports Arena', tag:'Sports & Fitness', cardIcon:'trophy', cardScene:'court',
+    desc:'A high-energy landing page for a multi-sport training facility — built to convert walk-in interest into booked sessions.',
+    grad:['#3ee6c4','#0891b2'],
+    brand:'IRONPEAK ARENA',
+    design:{ display:"'Manrope', sans-serif", body:"'Inter', sans-serif", brandWeight:800, brandTracking:'-0.3px', btnRadius:'8px', markRadius:'2px', heroWeight:800, heroSize:'clamp(1.7rem, 3.6vw, 2.5rem)', heroTracking:'-1.2px', heroLh:'1.06', h3Weight:800, bg:'#080b12', panel:'#0d1119' },
+    navLinks:['Programs','Schedule','Coaches','Membership'],
+    heroEyebrow:'Now Enrolling · Fall Season',
+    heroTitle:'Play At The Speed Of Legends.',
+    heroSub:'Multi-sport courts, certified coaches, and flexible memberships — book your first session in under a minute.',
+    heroScene:'court',
+    primaryCta:'Book A Court',
+    ghostCta:'View Schedule',
+    trust:[
+      {icon:'court', label:'6 Sport Courts'},
+      {icon:'trophy', label:'Certified Coaches'},
+      {icon:'calendar', label:'Live Booking'}
+    ],
+    galleryLabel:'This Week', galleryTitle:'Open Sessions & Leagues',
+    tiles:[
+      {scene:'court', title:'Basketball League', badge:'7PM', variant:'a'},
+      {scene:'court', title:'Futsal Nights', badge:'8PM', variant:'b'},
+      {scene:'court', title:'Volleyball Open Play', badge:'6PM', variant:'c'},
+      {scene:'training', title:'Boxing Fundamentals', badge:'10AM'}
+    ],
+    ctaTitle:'Your First Session Is On Us.',
+    ctaScene:'training'
+  },
+  {
+    key:'salon', title:'Luxe Salon', tag:'Beauty & Wellness', cardIcon:'droplet', cardScene:'salon',
+    desc:'An elegant, appointment-first site for a premium salon brand — soft gradients and a booking flow as polished as the service.',
+    grad:['#e8c8a0','#8b5cf6'],
+    brand:'Bella Glow Salon',
+    design:{ display:"'Playfair Display', serif", body:"'Cormorant Garamond', serif", brandWeight:600, brandTracking:'0.5px', btnRadius:'2px', markRadius:'50%', heroWeight:600, heroStyle:'italic', heroSize:'clamp(1.7rem, 3.6vw, 2.4rem)', heroTracking:'0px', heroLh:'1.15', h3Weight:600, bg:'#100a10', panel:'#150d16' },
+    navLinks:['Services','Stylists','Gallery','Book'],
+    heroEyebrow:'Luxury Beauty Salon',
+    heroTitle:'Beauty, Perfected.',
+    heroSub:'Colour, cut, and care from a team trained across three continents — book online in thirty seconds.',
+    heroScene:'salon',
+    primaryCta:'Book Appointment',
+    ghostCta:'Learn More',
+    trust:[
+      {icon:'gem', label:'Premium Products'},
+      {icon:'scissors', label:'Expert Stylists'},
+      {icon:'droplet', label:'Tailored Rituals'}
+    ],
+    galleryLabel:'Client Favourites', galleryTitle:'Services Tailored Just For You',
+    tiles:[
+      {scene:'beautyTool', title:'Balayage', badge:'2.5 hrs', variant:'a'},
+      {scene:'salon', title:'Scalp Treatment', badge:'45 min', variant:'b'},
+      {scene:'beautyTool', title:'Gel Manicure', badge:'45 min', variant:'c'},
+      {scene:'salon', title:'Bridal Package', badge:'Full AM', variant:'a'}
+    ],
+    ctaTitle:'Your Chair Is Ready.',
+    ctaScene:'salon'
+  },
+  {
+    key:'restaurant', title:'Ember Restaurant', tag:'Food & Dining', cardIcon:'flame', cardScene:'plate',
+    desc:'A moody, appetite-driving site for a fine-dining restaurant with reservations front and center.',
+    grad:['#e8934a','#8b5cf6'],
+    brand:'Urban Grill',
+    design:{ display:"'Playfair Display', serif", body:"'Inter', sans-serif", brandWeight:700, brandTracking:'3px', btnRadius:'2px', markRadius:'2px', heroWeight:700, heroSize:'clamp(1.7rem, 3.6vw, 2.4rem)', heroTracking:'-0.5px', heroLh:'1.1', h3Weight:700, bg:'#0d0806', panel:'#130c09' },
+    navLinks:['Menu','Reservations','Private Events','Location'],
+    heroEyebrow:'Fine Dining Restaurant',
+    heroTitle:'Fire. Flavor. Finesse.',
+    heroSub:'Seasonal tasting menus and a wood-fired kitchen — reserve your table before the weekend fills up.',
+    heroScene:'plate',
+    primaryCta:'Reserve A Table',
+    ghostCta:'Learn More',
+    trust:[
+      {icon:'flame', label:'Wood-Fired Kitchen'},
+      {icon:'wine', label:'Curated Pairings'},
+      {icon:'pin', label:'Private Dining'}
+    ],
+    galleryLabel:"Featured Dishes", galleryTitle:"Chef's Selections",
+    tiles:[
+      {scene:'plate', title:'Charred Ribeye', badge:'$44', variant:'a'},
+      {scene:'plate', title:'Seared Scallops', badge:'$28', variant:'b'},
+      {scene:'plate', title:'Wild Mushroom Tagliatelle', badge:'$26', variant:'c'},
+      {scene:'wineGlass', title:'Chocolate Torte', badge:'$12', variant:'a'}
+    ],
+    ctaTitle:'Tables Are Filling Fast Tonight.',
+    ctaScene:'wineGlass'
+  },
+  {
+    key:'gaming', title:'Nova Gaming Zone', tag:'Gaming & Esports', cardIcon:'gamepad', cardScene:'rig',
+    desc:'A neon-charged hub for a gaming lounge with leaderboards and event countdowns.',
+    grad:['#00d4ff','#c084fc'],
+    brand:'NOVA ZONE',
+    design:{ display:"'Bebas Neue', sans-serif", body:"'Inter', sans-serif", brandWeight:400, brandTracking:'1.5px', brandSize:'1.2rem', btnRadius:'4px', markRadius:'2px', heroWeight:400, heroSize:'clamp(1.9rem, 4vw, 2.7rem)', heroTracking:'0.5px', heroLh:'1.02', h3Weight:400, bg:'#07060f', panel:'#0c0a18' },
+    navLinks:['Arena','Tournaments','Membership','Leaderboard'],
+    heroEyebrow:'Esports & Gaming Lounge',
+    heroTitle:'Where Legends Respawn.',
+    heroSub:'High-refresh rigs, ranked lounges, and weekly tournaments with real prize pools.',
+    heroScene:'lounge',
+    primaryCta:'Register Now',
+    ghostCta:'Learn More',
+    trust:[
+      {icon:'monitor', label:'240Hz Rigs'},
+      {icon:'medal', label:'Weekly Tournaments'},
+      {icon:'users', label:'Squad Rooms'}
+    ],
+    galleryLabel:'This Season', galleryTitle:'Active Tournaments',
+    tiles:[
+      {scene:'rig', title:'Valorant Cup', badge:'$2,000', variant:'a'},
+      {scene:'lounge', title:'Smash Bracket', badge:'64 Slots', variant:'b'},
+      {scene:'rig', title:'Racing League', badge:'6 Races', variant:'c'},
+      {scene:'lounge', title:'Retro Night', badge:'Sundays', variant:'a'}
+    ],
+    ctaTitle:'128 Slots Left For This Weekend.',
+    ctaScene:'rig'
+  }
+];
+
+const grid = document.getElementById('card-grid');
+projects.forEach(p=>{
+  const card = document.createElement('div');
+  card.className = 'holo-card';
+  card.dataset.key = p.key;
+  card.innerHTML = `
+    <div class="holo-inner">
+      <div class="holo-icon" style="background-image:${sceneBg(p.cardScene, p.grad[0], p.grad[1])}; background-size:cover; background-position:center;">
+        <div class="holo-icon-shade"></div>
+        <span class="holo-icon-svg" style="color:${p.grad[0]};">${icon(p.cardIcon)}</span>
+      </div>
+      <div class="holo-tag">${p.tag}</div>
+      <div class="holo-title">${p.title}</div>
+      <div class="holo-desc">${p.desc.slice(0,72)}...</div>
+      <div class="holo-open">Open Preview
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+    </div>`;
+  card.addEventListener('click', ()=>openPreview(p.key));
+  grid.appendChild(card);
+});
+
+// Preload every real photo used across previews so the first click into a
+// preview shows fully-loaded imagery instantly instead of a pop-in flash.
+function preloadScenePhotos(){
+  Object.values(SCENE_PHOTOS).forEach(url=>{
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = url;
+    document.head.appendChild(link);
+  });
+}
+if('requestIdleCallback' in window){
+  requestIdleCallback(preloadScenePhotos, {timeout:2000});
+} else {
+  setTimeout(preloadScenePhotos, 400);
+}
+
+// ---------- PREVIEW MODAL: renders a full mini landing page per business ----------
+const overlay = document.getElementById('preview-overlay');
+const modalBody = document.getElementById('preview-modal-body');
+
+
+function openPreview(key){
+  const p = projects.find(x=>x.key===key);
+  const [c1, c2] = p.grad;
+  const d = p.design;
+
+  const rootVars = `
+    --dc1:${c1}; --dc2:${c2};
+    --dfont-display:${d.display}; --dfont-body:${d.body};
+    --dbrand-weight:${d.brandWeight}; --dbrand-tracking:${d.brandTracking};
+    --dbrand-size:${d.brandSize || '1.05rem'};
+    --dbtn-radius:${d.btnRadius}; --dmark-radius:${d.markRadius};
+    --dhero-weight:${d.heroWeight}; --dhero-style:${d.heroStyle || 'normal'};
+    --dhero-size:${d.heroSize}; --dhero-tracking:${d.heroTracking}; --dhero-lh:${d.heroLh};
+    --dh3-weight:${d.h3Weight}; --dh3-tracking:${d.heroTracking};
+    --dbg:${d.bg}; --dpanel:${d.panel};
+  `;
+
+  modalBody.innerHTML = `
+    <div class="browser-chrome">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        ${p.brand.toLowerCase().replace(/[^a-z0-9]+/g,'')}.com
+      </div>
+      <div class="browser-tag">Live Preview</div>
+    </div>
+
+    <div class="demo-site" style="${rootVars}">
+      <nav class="demo-nav">
+        <div class="dn-brand"><span class="dn-mark"></span>${p.brand}</div>
+        <div class="dn-links">
+          ${p.navLinks.map(l=>`<span>${l}</span>`).join('')}
+        </div>
+        <a class="dn-cta">${p.primaryCta}</a>
+      </nav>
+
+      <section class="demo-hero">
+        <div class="scene-bg" style="background-image:${sceneBg(p.heroScene, c1, c2)}; background-size:cover; background-position:center;"></div>
+        <div class="scene-shade"></div>
+        <div class="dh-inner">
+          <div class="dh-eyebrow">${p.heroEyebrow}</div>
+          <h2>${p.heroTitle}</h2>
+          <div class="dh-btns">
+            <a class="dh-btn-primary">${p.primaryCta} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a class="dh-btn-ghost">${p.ghostCta}</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="demo-trust">
+        ${p.trust.map(t=>`
+          <div class="dt-item">${icon(t.icon)}<span><b>${t.label.split(' ')[0]}</b> ${t.label.split(' ').slice(1).join(' ')}</span></div>
+        `).join('')}
+      </div>
+
+      <section class="demo-section">
+        <div class="ds-label">${p.galleryLabel}</div>
+        <h3>${p.galleryTitle}</h3>
+        <div class="demo-tiles">
+          ${p.tiles.map((t)=>{
+            return `<div class="demo-tile">
+              <div class="scene-bg" style="background-image:${sceneBg(t.scene, c1, c2, t.variant)}; background-size:cover; background-position:${scenePosition(t.variant)};"></div>
+              <div class="tile-shade"></div>
+              <div class="tile-content">
+                <div class="tile-text">
+                  <div class="tile-title">${t.title}</div>
+                </div>
+                <div class="tile-badge">${t.badge}</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </section>
+
+      <section class="demo-footer-cta">
+        <div class="scene-bg" style="background-image:${sceneBg(p.ctaScene, c1, c2)}; background-size:cover; background-position:center;"></div>
+        <h4>${p.ctaTitle}</h4>
+        <div class="dh-btns">
+          <a class="dh-btn-primary">${p.primaryCta}</a>
+        </div>
+      </section>
+    </div>
+  `;
+
+  overlay.classList.add('active');
+  modalOpen = true;
+}
+function closePreview(){
+  overlay.classList.remove('active');
+  modalOpen = false;
+}
+document.getElementById('preview-close').addEventListener('click', closePreview);
+overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closePreview(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closePreview(); });
+
+// ---------- CONTACT FORM ----------
+// Submits via AJAX (fetch) directly to Formspree so messages land straight in
+// the connected inbox without a page reload — no email address exposed on the page.
+// Endpoint: https://formspree.io/f/xdarpned
+const contactForm = document.getElementById('contact-form');
+const formMsg = document.getElementById('form-msg');
+
+contactForm.addEventListener('submit', async function(e){
+  e.preventDefault();
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'Sending...';
+  submitBtn.disabled = true;
+  formMsg.style.color = 'var(--blue)';
+  formMsg.textContent = '';
+
+  try{
+    const res = await fetch(this.action, {
+      method:'POST',
+      body:new FormData(this),
+      headers:{ 'Accept':'application/json' }
+    });
+
+    if(res.ok){
+      formMsg.style.color = 'var(--blue)';
+      formMsg.textContent = "Thanks — your message is in. I'll reply within 24 hours.";
+      this.reset();
+    } else {
+      // Formspree returns 422 with { errors: [{ field, message }, ...] } on validation failure
+      const data = await res.json().catch(()=>null);
+      const detail = data?.errors?.length
+        ? data.errors.map(err => err.message).join(' ')
+        : "Something went wrong sending that.";
+      throw new Error(detail);
+    }
+  } catch(err){
+    formMsg.style.color = '#ff8b8b';
+    formMsg.textContent = `${err.message} Please call or message via Instagram below instead.`;
+  } finally {
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  }
+});
+
+document.getElementById('book-call-btn').addEventListener('click', ()=>{
+  window.open('https://instagram.com/elevate.webs', '_blank', 'noopener');
+});
+
+// ---------- SCROLL REVEAL ----------
+const revealEls = document.querySelectorAll('.content-panel, .holo-card');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting) entry.target.classList.add('in-view');
+  });
+}, {threshold:0.2});
+revealEls.forEach(el=>io.observe(el));
+
+/* ============================================================
+   THREE.JS SCENE — SCROLL-DRIVEN TUNNEL FLIGHT
+   ============================================================ */
+const canvas = document.getElementById('webgl-canvas');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x05030d, 0.018);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
+camera.position.set(0,0,10);
+
+// Lighting: neon blue + purple
+const ambient = new THREE.AmbientLight(0x1a1030, 1.2);
+scene.add(ambient);
+
+const blueLight = new THREE.PointLight(0x00d4ff, 3, 120);
+blueLight.position.set(0,10,0);
+scene.add(blueLight);
+
+const purpleLight = new THREE.PointLight(0x8b5cf6, 3, 120);
+purpleLight.position.set(0,-10,-40);
+scene.add(purpleLight);
+
+const purpleLight2 = new THREE.PointLight(0xc084fc, 2.5, 150);
+purpleLight2.position.set(20,0,-120);
+scene.add(purpleLight2);
+
+const blueLight2 = new THREE.PointLight(0x00d4ff, 2.5, 150);
+blueLight2.position.set(-20,0,-220);
+scene.add(blueLight2);
+
+// ---------- TUNNEL: ring segments ----------
+const TUNNEL_LENGTH = 900;
+const RING_COUNT = 70;
+const RING_SPACING = TUNNEL_LENGTH / RING_COUNT;
+const TUNNEL_RADIUS = 9;
+
+const ringGroup = new THREE.Group();
+scene.add(ringGroup);
+
+const ringGeo = new THREE.TorusGeometry(TUNNEL_RADIUS, 0.045, 8, 48);
+
+for(let i=0;i<RING_COUNT;i++){
+  const t = i / RING_COUNT;
+  const colorMix = new THREE.Color(0x00d4ff).lerp(new THREE.Color(0x8b5cf6), (Math.sin(t*Math.PI*4)+1)/2);
+  const mat = new THREE.MeshBasicMaterial({
+    color: colorMix,
+    transparent:true,
+    opacity:0.55
+  });
+  const ring = new THREE.Mesh(ringGeo, mat);
+  ring.position.z = -i * RING_SPACING;
+  ring.rotation.z = i * 0.15;
+  ringGroup.add(ring);
+}
+
+// Secondary inner rings (rotated squares) for tech feel
+const squareGroup = new THREE.Group();
+scene.add(squareGroup);
+const squareGeo = new THREE.RingGeometry(TUNNEL_RADIUS*0.55, TUNNEL_RADIUS*0.58, 4);
+for(let i=0;i<Math.floor(RING_COUNT/2);i++){
+  const mat = new THREE.MeshBasicMaterial({
+    color: i%2===0 ? 0x00d4ff : 0xc084fc,
+    transparent:true,
+    opacity:0.18,
+    side:THREE.DoubleSide
+  });
+  const sq = new THREE.Mesh(squareGeo, mat);
+  sq.position.z = -i * RING_SPACING * 2;
+  sq.rotation.z = Math.PI/4 + i*0.3;
+  squareGroup.add(sq);
+}
+
+// ---------- PARTICLES: floating dust through the tunnel ----------
+const PARTICLE_COUNT = 1400;
+const particleGeo = new THREE.BufferGeometry();
+const positions = new Float32Array(PARTICLE_COUNT * 3);
+const particleColors = new Float32Array(PARTICLE_COUNT * 3);
+const colorA = new THREE.Color(0x00d4ff);
+const colorB = new THREE.Color(0xc084fc);
+
+for(let i=0;i<PARTICLE_COUNT;i++){
+  const angle = Math.random()*Math.PI*2;
+  const radius = Math.random()*TUNNEL_RADIUS*1.4;
+  positions[i*3]   = Math.cos(angle)*radius;
+  positions[i*3+1] = Math.sin(angle)*radius;
+  positions[i*3+2] = -Math.random()*TUNNEL_LENGTH;
+
+  const mixed = colorA.clone().lerp(colorB, Math.random());
+  particleColors[i*3]   = mixed.r;
+  particleColors[i*3+1] = mixed.g;
+  particleColors[i*3+2] = mixed.b;
+}
+particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+
+const particleMat = new THREE.PointsMaterial({
+  size:0.16,
+  vertexColors:true,
+  transparent:true,
+  opacity:0.85,
+  blending:THREE.AdditiveBlending,
+  depthWrite:false
+});
+const particles = new THREE.Points(particleGeo, particleMat);
+scene.add(particles);
+
+// ---------- FLOATING CITY (Section 2 world) ----------
+const cityGroup = new THREE.Group();
+cityGroup.position.z = -RING_SPACING * (RING_COUNT * 0.32);
+scene.add(cityGroup);
+
+function buildTower(x,y,z,w,h,d,color){
+  const geo = new THREE.BoxGeometry(w,h,d);
+  const mat = new THREE.MeshStandardMaterial({
+    color:0x0a0e27,
+    emissive:color,
+    emissiveIntensity:0.35,
+    metalness:0.6,
+    roughness:0.3,
+    transparent:true,
+    opacity:0.85
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x,y,z);
+
+  // wireframe edge glow
+  const edges = new THREE.EdgesGeometry(geo);
+  const lineMat = new THREE.LineBasicMaterial({color:color, transparent:true, opacity:0.9});
+  const wireframe = new THREE.LineSegments(edges, lineMat);
+  mesh.add(wireframe);
+
+  return mesh;
+}
+
+for(let i=0;i<26;i++){
+  const angle = (i/26)*Math.PI*2;
+  const dist = 14 + Math.random()*22;
+  const x = Math.cos(angle)*dist;
+  const y = Math.sin(angle)*dist*0.5 - 4;
+  const z = -Math.random()*140;
+  const h = 4 + Math.random()*14;
+  const color = Math.random()>0.5 ? 0x00d4ff : 0x8b5cf6;
+  const tower = buildTower(x,y,z, 1.4+Math.random()*1.6, h, 1.4+Math.random()*1.6, color);
+  cityGroup.add(tower);
+}
+
+// ---------- HOLOGRAM FIELD (Section 3 world) ----------
+const holoGroup = new THREE.Group();
+holoGroup.position.z = -RING_SPACING * (RING_COUNT * 0.64);
+scene.add(holoGroup);
+
+const holoColors = [0x00d4ff, 0xc084fc, 0x8b5cf6, 0x00d4ff];
+const holoMeshes = [];
+for(let i=0;i<4;i++){
+  const angle = (i/4)*Math.PI*2;
+  const x = Math.cos(angle)*10;
+  const y = Math.sin(angle)*6;
+  const geo = new THREE.IcosahedronGeometry(2.2, 0);
+  const mat = new THREE.MeshBasicMaterial({
+    color: holoColors[i],
+    wireframe:true,
+    transparent:true,
+    opacity:0.55
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x,y,-i*8);
+  holoGroup.add(mesh);
+  holoMeshes.push(mesh);
+}
+
+// ---------- STARFIELD / OUTER SPACE (Section 4 world) ----------
+const starGeo = new THREE.BufferGeometry();
+const STAR_COUNT = 2000;
+const starPos = new Float32Array(STAR_COUNT*3);
+const spaceZ = -RING_SPACING * (RING_COUNT * 0.95);
+for(let i=0;i<STAR_COUNT;i++){
+  starPos[i*3]   = (Math.random()-0.5)*160;
+  starPos[i*3+1] = (Math.random()-0.5)*160;
+  starPos[i*3+2] = spaceZ - Math.random()*260;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
+const starMat = new THREE.PointsMaterial({
+  color:0xffffff, size:0.09, transparent:true, opacity:0.9
+});
+const stars = new THREE.Points(starGeo, starMat);
+scene.add(stars);
+
+// glowing sun-like orb for contact universe
+const orbGeo = new THREE.SphereGeometry(6, 32, 32);
+const orbMat = new THREE.MeshBasicMaterial({color:0x8b5cf6, transparent:true, opacity:0.25});
+const orb = new THREE.Mesh(orbGeo, orbMat);
+orb.position.set(0,0, spaceZ - 60);
+scene.add(orb);
+const orbGeo2 = new THREE.SphereGeometry(3.6, 32, 32);
+const orbMat2 = new THREE.MeshBasicMaterial({color:0x00d4ff, transparent:true, opacity:0.4});
+const orbCore = new THREE.Mesh(orbGeo2, orbMat2);
+orbCore.position.copy(orb.position);
+scene.add(orbCore);
+
+// ---------- SCROLL -> CAMERA MAPPING ----------
+let scrollProgress = 0; // 0..1 across entire page
+let targetZ = 10;
+let currentZ = 10;
+
+function getScrollProgress(){
+  const doc = document.documentElement;
+  const scrollTop = window.scrollY || doc.scrollTop;
+  const scrollHeight = doc.scrollHeight - window.innerHeight;
+  return scrollHeight > 0 ? Math.min(Math.max(scrollTop/scrollHeight,0),1) : 0;
+}
+
+const CAMERA_TRAVEL = TUNNEL_LENGTH * 1.02;
+
+window.addEventListener('scroll', ()=>{
+  scrollProgress = getScrollProgress();
+  targetZ = 10 - scrollProgress * CAMERA_TRAVEL;
+}, {passive:true});
+
+// mouse parallax
+let mouseX = 0, mouseY = 0;
+window.addEventListener('mousemove', (e)=>{
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+// ---------- RESIZE ----------
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ---------- ANIMATE ----------
+const clock = new THREE.Clock();
+
+function animate(){
+  requestAnimationFrame(animate);
+  if(modalOpen) return; // skip all scene work + render call while the tunnel is hidden
+
+  const t = clock.getElapsedTime();
+
+  // smooth camera glide toward scroll target
+  currentZ += (targetZ - currentZ) * 0.07;
+  camera.position.z = currentZ;
+
+  // gentle mouse parallax + idle drift
+  camera.position.x += ((mouseX*1.2) - camera.position.x) * 0.04;
+  camera.position.y += ((-mouseY*0.8 + Math.sin(t*0.3)*0.3) - camera.position.y) * 0.04;
+  camera.lookAt(camera.position.x*0.5, camera.position.y*0.5, currentZ - 40);
+
+  // rotate rings slowly for hypnotic tunnel feel
+  ringGroup.children.forEach((ring,i)=>{
+    ring.rotation.z += 0.002 + (i%3)*0.0006;
+  });
+  squareGroup.children.forEach((sq,i)=>{
+    sq.rotation.z -= 0.0015;
+  });
+
+  // particle drift
+  particles.rotation.z += 0.0006;
+
+  // city gentle bob
+  cityGroup.children.forEach((tower,i)=>{
+    tower.position.y += Math.sin(t*0.5 + i)*0.0015;
+    tower.rotation.y += 0.0008;
+  });
+
+  // hologram spin
+  holoMeshes.forEach((h,i)=>{
+    h.rotation.x += 0.004 + i*0.0006;
+    h.rotation.y += 0.006;
+    h.position.y += Math.sin(t*0.6+i)*0.002;
+  });
+
+  // orb pulse
+  const pulse = 1 + Math.sin(t*1.4)*0.06;
+  orbCore.scale.set(pulse,pulse,pulse);
+  orb.rotation.y += 0.001;
+
+  // stars slow twinkle rotation
+  stars.rotation.z += 0.00008;
+
+  // light drift for atmosphere
+  blueLight.position.x = Math.sin(t*0.2)*10;
+  purpleLight.position.x = Math.cos(t*0.15)*10;
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
